@@ -43,5 +43,6 @@ def custom_exc(shell, etype, evalue, tb, tb_offset=None):
         shell.showtraceback((etype, evalue, tb), tb_offset=tb_offset)
 
 
-# Bind the function we created to IPython's exception handler
-IPython.get_ipython().set_custom_exc((Exception,), custom_exc)
+if IPython.get_ipython():
+    # Bind the function we created to IPython's exception handler
+    IPython.get_ipython().set_custom_exc((Exception,), custom_exc)

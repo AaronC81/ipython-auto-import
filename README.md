@@ -1,5 +1,4 @@
 # ipython-auto-import
-Automatically import a Python library in IPython when you forget to import it
 
 How many times have you quickly wanted to test something, only to do this?
 
@@ -36,3 +35,6 @@ Out[1]:
 ```
 
 The first time you reference a module, it imports it auto-magically!
+
+## Installation
+Fork the repository, then create an environment variable called `PYTHONSTARTUP` and set its value to the location of `import-wrapper.py`.
