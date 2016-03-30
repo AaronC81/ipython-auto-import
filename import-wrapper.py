@@ -5,6 +5,8 @@ import re
 
 colorama.init()
 
+common_others = {"pd": "pandas", "np": "numpy"}
+
 
 def custom_exc(shell, etype, evalue, tb, tb_offset=None):
     pre = (colorama.Fore.CYAN + colorama.Style.BRIGHT +
@@ -20,8 +22,28 @@ def custom_exc(shell, etype, evalue, tb, tb_offset=None):
             try:
                 __import__(name)
             except:
-                print(pre + "{} isn't a module".format(name))
-                return
+                if common_others.get(name):
+                    new_name = common_others.get(name)
+                    try:
+                        __import__(new_name)
+                        
+                        p = IPython.get_ipython()
+                        r = p.ask_yes_no(pre + 
+                                     "{0} isn't a module, but {1} is."
+                                     " Import {1} as {0}? (Y/n)"
+                                     .format(name, new_name))
+                        if r:
+                            name = "{} as {}".format(new_name, name)
+                        else:
+                            return
+                    except Exception as e:
+                        print(pre + "{} isn't a module and "
+                              "nor is {}".format(name, new_name))
+                        print(e)
+                        return
+                else:
+                    print(pre + "{} isn't a module".format(name))
+                    return
 
             # Import the module
             IPython.get_ipython().run_code("import {}".format(name))
