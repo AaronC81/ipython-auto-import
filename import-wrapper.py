@@ -5,7 +5,7 @@ import re
 
 colorama.init()
 
-common_others = {"pd": "pandas", "np": "numpy"}
+common_others = {"pd": "pandas", "np": "numpy", "sp": "scipy"}
 
 
 def custom_exc(shell, etype, evalue, tb, tb_offset=None):
@@ -26,12 +26,11 @@ def custom_exc(shell, etype, evalue, tb, tb_offset=None):
                     new_name = common_others.get(name)
                     try:
                         __import__(new_name)
-                        
                         p = IPython.get_ipython()
-                        r = p.ask_yes_no(pre + 
-                                     "{0} isn't a module, but {1} is."
-                                     " Import {1} as {0}? (Y/n)"
-                                     .format(name, new_name))
+                        r = p.ask_yes_no(pre +
+                                         "{0} isn't a module, but {1} is."
+                                         " Import {1} as {0}? (Y/n)"
+                                         .format(name, new_name))
                         if r:
                             name = "{} as {}".format(new_name, name)
                         else:
