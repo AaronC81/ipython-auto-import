@@ -37,4 +37,8 @@ Out[1]:
 The first time you reference a module, it imports it auto-magically!
 
 ## Installation
-Fork the repository, then create an environment variable called `PYTHONSTARTUP` and set its value to the location of `import-wrapper.py`.
+Add `import-wrapper.py` to `~/.ipython/extensions`, then call `%load_ext import-wrapper` either at the IPython prompt, or add
+```
+c.InteractiveShellApp.exec_lines.append("%load_ext import-wrapper")
+```
+at the end of `~/.ipython/profile_default/ipython_config.py`.
