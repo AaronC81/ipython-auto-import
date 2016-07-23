@@ -14,6 +14,12 @@ def custom_exc(ipython, shell, etype, evalue, tb, tb_offset=None):
            colorama.Fore.WHITE)
     shell.showtraceback((etype, evalue, tb), tb_offset)
 
+    while tb.tb_next:
+        tb = tb.tb_next
+    if not re.match("\\A<ipython-input-.*>\\Z", tb.tb_frame.f_code.co_filename):
+        # Innermost frame is not the IPython interactive environment.
+        return
+
     try:
         # Get the name of the module you tried to import
         results = re.match("\\Aname '(.*)' is not defined\\Z", str(evalue))
