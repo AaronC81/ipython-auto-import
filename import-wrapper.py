@@ -15,13 +15,8 @@ class pipUnsuccessfulException(Exception):
     pass
 
 
-last_was_exception = False
-
 
 def custom_exc(ipython, shell, etype, evalue, tb, tb_offset=None):
-    global last_was_exception
-    last_was_exception = True
-    print(last_was_exception)
     shell.showtraceback((etype, evalue, tb), tb_offset)
 
     while tb.tb_next:
