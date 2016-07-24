@@ -6,12 +6,17 @@ import colorama
 colorama.init()
 
 common_others = {"pd": "pandas", "np": "numpy", "sp": "scipy"}
+pre = (colorama.Fore.CYAN + colorama.Style.BRIGHT +
+       "AutoImport: " + colorama.Style.NORMAL +
+       colorama.Fore.WHITE)
+
+
+class pipUnsuccessfulException(Exception):
+    pass
+
 
 
 def custom_exc(ipython, shell, etype, evalue, tb, tb_offset=None):
-    pre = (colorama.Fore.CYAN + colorama.Style.BRIGHT +
-           "AutoImport: " + colorama.Style.NORMAL +
-           colorama.Fore.WHITE)
     shell.showtraceback((etype, evalue, tb), tb_offset)
 
     while tb.tb_next:
@@ -26,6 +31,7 @@ def custom_exc(ipython, shell, etype, evalue, tb, tb_offset=None):
         if not results:
             return
         name = results.group(1)
+        custom_exc.last_name = name
 
         try:
             __import__(name)
@@ -50,6 +56,28 @@ def custom_exc(ipython, shell, etype, evalue, tb, tb_offset=None):
                     return
             else:
                 print(pre + "{} isn't a module".format(name))
+                try:
+                    last_name = custom_exc.last_name
+                    if ipython.ask_yes_no(pre + "Attempt to pip-install {}? (Y/n)"
+                                                .format(last_name)):
+                        if __import__("pip").main(["install", last_name]) != 0:
+                            raise pipUnsuccessfulException
+                    else:
+                        return
+                    print(pre + "Installation completed successfully, importing...")
+                    try:
+                        res = ipython.run_cell("import {}".format(last_name))
+                        print(pre + "Imported referenced module {}".format(last_name))
+                    except:
+                        print(pre + "{} isn't a module".format(last_name))
+                except pipUnsuccessfulException:
+                    print(pre + "Installation with pip failed")
+
+                except AttributeError:
+                    print(pre + "No module to install")
+
+                except ImportError:
+                    print(pre + "pip not found")
                 return
 
         # Import the module
@@ -67,6 +95,7 @@ def custom_exc(ipython, shell, etype, evalue, tb, tb_offset=None):
     except Exception as e:
         print(pre + "Another exception occured while retrying")
         shell.showtraceback((type(e), e, None), None)
+
 
 
 def load_ipython_extension(ipython):
