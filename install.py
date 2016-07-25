@@ -9,8 +9,14 @@ extensions_path = os.path.join(u, ".ipython", "extensions",
 config_path = os.path.join(u, ".ipython", "profile_default",
                            "ipython_config.py")
 
-shutil.copyfile("import-wrapper.py", extensions_path)
+shutil.copyfile("import_wrapper.py", extensions_path)
 
 with open(config_path, "a") as f:
-    f.write("\nc.InteractiveShellApp.exec_lines.append(\"%load_ext import-wra"
+    f.write("\nc.InteractiveShellApp.exec_lines.append(\"%load_ext import_wra"
             "pper\")")
+
+print("Installation complete.")
+try:
+	import colorama
+except ImportError:
+	print("NOTE: Install 'colorama' for best results: 'pip install colorama'")
