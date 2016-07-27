@@ -3,6 +3,7 @@ PIP_ENABLED = False
 from functools import partial
 import re
 import sys
+import ast
 
 try:
     import colorama
@@ -37,10 +38,11 @@ def custom_exc(ipython, shell, etype, evalue, tb, tb_offset=None):
         name = results.group(1)
         custom_exc.last_name = name
 
-        ipython.history_manager.get_tail(ipython.history_load_length, raw=False)
-
         try:
             __import__(name)
+            ipython.run_code("import {}".format(name))
+            print(pre + "Imported referenced module {!r}, will retry".format(name))
+            print("".join("-" for _ in range(75)))
         except:
             if common_others.get(name):
                 new_name = common_others.get(name)
@@ -52,6 +54,9 @@ def custom_exc(ipython, shell, etype, evalue, tb, tb_offset=None):
                         "Import {1} as {0}? (Y/n)".format(name, new_name))
                     if r:
                         name = "{} as {}".format(new_name, name)
+                        ipython.run_code("import {}".format(name))
+                        print(pre + "Imported referenced module {!r}, will retry".format(name))
+                        print("".join("-" for _ in range(75)))
                     else:
                         return
                 except Exception as e:
@@ -62,6 +67,50 @@ def custom_exc(ipython, shell, etype, evalue, tb, tb_offset=None):
                     return
             else:
                 print(pre + "{} isn't a module".format(name))
+                
+                imports = set()
+
+                class Visitor(ast.NodeVisitor):
+                    def visit_Import(self, node):
+                        imports.update((alias.name, alias.asname) for alias in node.names)
+                        self.generic_visit(node)
+
+                    def visit_ImportFrom(self, node):
+                        if not node.level:  # Skip relative imports.
+                            imports.update((node.module, alias.name, alias.asname)
+                                        for alias in node.names)
+                        self.generic_visit(node)
+
+                for _, _, entry in (
+                        ipython.history_manager.get_tail(ipython.history_load_length, raw=False)):
+                    try:
+                        parsed = ast.parse(entry)
+                    except SyntaxError:
+                        continue
+                    Visitor().visit(parsed)
+
+                imports = filter(lambda x: len(x) == 3 and x[1] == name, imports)
+                import_strings = ["from {} import {}".format(*x) if x[2] is None
+                                  else "from {} import {} as {}".format(*x)
+                                  for x in imports]
+                if any(import_strings):
+                    print(pre + "Based on your history, there are some `from ."
+                          ".. import ...` options for {}.".format(name))
+                    # Skip if only one?
+                    for i, x in enumerate(import_strings):
+                        print("       [{}]: {}".format(i + 1, x))
+                    chosen_number = input(pre + "Enter a number (or anything else to cancel): ")
+                    if chosen_number.isdigit() and int(chosen_number) <= len(import_strings):
+                        ipython.run_cell(import_strings[int(chosen_number) - 1])
+                        print(pre + "Ran '{}', will retry".format(import_strings[int(chosen_number) - 1]))
+                        try:
+                            # Run the failed line again
+                            res = ipython.run_cell(
+                                list(ipython.history_manager.get_range())[-1][-1])
+                        except Exception as e:
+                            print(pre + "Another exception occured while retrying")
+                            shell.showtraceback((type(e), e, None), None)
+                
                 if PIP_ENABLED:
                     try:
                         last_name = custom_exc.last_name
@@ -87,13 +136,11 @@ def custom_exc(ipython, shell, etype, evalue, tb, tb_offset=None):
                         print(pre + "pip not found")
                 return
 
-        # Import the module
-        ipython.run_code("import {}".format(name))
-        print(pre + "Imported referenced module {!r}, will retry".format(name))
-        print("".join("-" for _ in range(75)))
     except Exception as e:
         print(pre + ("Attempted to import {!r}"
-                     "but an exception occured".format(name)))
+                     " but this exception occured:".format(name)))
+        print(e)
+        return
 
     try:
         # Run the failed line again
