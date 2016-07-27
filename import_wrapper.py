@@ -89,7 +89,7 @@ def custom_exc(ipython, shell, etype, evalue, tb, tb_offset=None):
                         continue
                     Visitor().visit(parsed)
 
-                imports = filter(lambda x: len(x) == 3 and x[1] == name, imports)
+                imports = filter(lambda x: len(x) == 3 and (x[1] == name or x[2] == name), imports)
                 import_strings = ["from {} import {}".format(*x) if x[2] is None
                                   else "from {} import {} as {}".format(*x)
                                   for x in imports]
