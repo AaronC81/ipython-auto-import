@@ -1,3 +1,5 @@
+PIP_ENABLED = False
+
 from functools import partial
 import re
 import sys
@@ -35,6 +37,8 @@ def custom_exc(ipython, shell, etype, evalue, tb, tb_offset=None):
         name = results.group(1)
         custom_exc.last_name = name
 
+        ipython.history_manager.get_tail(ipython.history_load_length, raw=False)
+
         try:
             __import__(name)
         except:
@@ -58,28 +62,29 @@ def custom_exc(ipython, shell, etype, evalue, tb, tb_offset=None):
                     return
             else:
                 print(pre + "{} isn't a module".format(name))
-                try:
-                    last_name = custom_exc.last_name
-                    if ipython.ask_yes_no(pre + "Attempt to pip-install {}? (Y/n)"
-                                                .format(last_name)):
-                        if __import__("pip").main(["install", last_name]) != 0:
-                            raise pipUnsuccessfulException
-                    else:
-                        return
-                    print(pre + "Installation completed successfully, importing...")
+                if PIP_ENABLED:
                     try:
-                        res = ipython.run_cell("import {}".format(last_name))
-                        print(pre + "Imported referenced module {}".format(last_name))
-                    except:
-                        print(pre + "{} isn't a module".format(last_name))
-                except pipUnsuccessfulException:
-                    print(pre + "Installation with pip failed")
+                        last_name = custom_exc.last_name
+                        if ipython.ask_yes_no(pre + "Attempt to pip-install {}? (Y/n)"
+                                                    .format(last_name)):
+                            if __import__("pip").main(["install", last_name]) != 0:
+                                raise pipUnsuccessfulException
+                        else:
+                            return
+                        print(pre + "Installation completed successfully, importing...")
+                        try:
+                            res = ipython.run_cell("import {}".format(last_name))
+                            print(pre + "Imported referenced module {}".format(last_name))
+                        except:
+                            print(pre + "{} isn't a module".format(last_name))
+                    except pipUnsuccessfulException:
+                        print(pre + "Installation with pip failed")
 
-                except AttributeError:
-                    print(pre + "No module to install")
+                    except AttributeError:
+                        print(pre + "No module to install")
 
-                except ImportError:
-                    print(pre + "pip not found")
+                    except ImportError:
+                        print(pre + "pip not found")
                 return
 
         # Import the module
