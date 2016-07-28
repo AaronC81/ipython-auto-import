@@ -5,15 +5,14 @@ u = os.path.expanduser("~")
 assert u != "~"
 
 extensions_path = os.path.join(u, ".ipython", "extensions",
-                               "import_wrapper.py")
+                               "autoimport.py")
 config_path = os.path.join(u, ".ipython", "profile_default",
-                           "ipython_config.py")
+                           "autoimport.py")
 
-shutil.copyfile("import_wrapper.py", extensions_path)
+shutil.copyfile("autoimport.py", extensions_path)
 
 with open(config_path, "a") as f:
-    f.write("\nc.InteractiveShellApp.exec_lines.append(\"%load_ext import_wra"
-            "pper\")")
+    f.write("\nc.InteractiveShellApp.exec_lines.append(\"%load_ext autoimport\")")
 
 print("Installation complete.")
 try:

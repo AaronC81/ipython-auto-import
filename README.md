@@ -20,21 +20,14 @@ Inspired by [this SO question](http://stackoverflow.com/questions/36112275/make-
 
 ```
 In [1]: pandas.read_clipboard()
----------------------------------------------------------------------------
-NameError                                 Traceback (most recent call last)
-<ipython-input-1-4c32fab697e6> in <module>()
-----> 1 pandas.read_clipboard()
-
-NameError: name 'pandas' is not defined
-AutoImport: Imported referenced module "pandas", will retry
----------------------------------------------------------------------------
+AutoImport: Imported pandas
 Out[1]:
        First,Last
 0         Foo,Bar
 1  John,Appleseed
 ```
 
-The first time you reference a module, it imports it auto-magically! Don't have the module installed? You can `pip install` it right from IPython.
+The first time you reference a module, it imports it auto-magically!
 
 ## Installation
 
@@ -44,8 +37,8 @@ The first time you reference a module, it imports it auto-magically! Don't have 
 Clone the repo and run `install.py`.
 
 ### Hard way
-Add `import_wrapper.py` to `~/.ipython/extensions`, then call `%load_ext import_wrapper` either at the IPython prompt, or add
+Add `autoimport.py` to `~/.ipython/extensions`, then call `%load_ext import_wrapper` either at the IPython prompt, or add
 ```
-c.InteractiveShellApp.exec_lines.append("%load_ext import_wrapper")
+c.InteractiveShellApp.exec_lines.append("%load_ext autoimport")
 ```
 at the end of `~/.ipython/profile_default/ipython_config.py`.
