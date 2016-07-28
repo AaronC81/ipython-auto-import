@@ -12,7 +12,7 @@ config_path = os.path.join(u, ".ipython", "profile_default",
 shutil.copyfile("autoimport.py", extensions_path)
 
 with open(config_path, "a") as f:
-    f.write("\nc.InteractiveShellApp.exec_lines.append(\"%load_ext autoimport\")")
+    f.write("\nget_config().InteractiveShellApp.exec_lines.append(\"%load_ext autoimport\")")
 
 print("Installation complete.")
 try:
