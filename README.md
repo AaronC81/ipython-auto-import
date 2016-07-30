@@ -37,7 +37,7 @@ The first time you reference a module, it imports it auto-magically!
 Clone the repo and run `install.py`.
 
 ### Hard way
-Add `autoimport.py` to `~/.ipython/extensions`, then call `%load_ext import_wrapper` either at the IPython prompt, or add
+Add `autoimport.py` to `~/.ipython/extensions`, then call `%load_ext autoimport` either at the IPython prompt, or add
 ```
 c.InteractiveShellApp.exec_lines.append("%load_ext autoimport")
 ```
